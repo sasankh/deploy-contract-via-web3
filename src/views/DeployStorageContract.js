@@ -13,7 +13,8 @@ class App extends Component {
     this.state = {
       web3: null,
       txnHash: null,
-      contractAddress: null
+      contractAddress: null,
+      deployedContract: null
     }
   }
 
@@ -33,35 +34,45 @@ class App extends Component {
   }
 
   deployContract() {
-    let contractJson = SimpleStorageContract;
 
-    // get ABI
-    let abi = contractJson.abi;
-    let bytecode = contractJson.bytecode;
-    let Contract  = this.state.web3.eth.contract(abi);
+    this.setState({
+      txnHash: null,
+      contractAddress: null,
+      deployedContract: null
+    }, () => {
+      let contractJson = SimpleStorageContract;
 
-    this.state.web3.eth.getAccounts((error, accounts) => {
-      if (error) {
-        alert("Problem getting account info");
-        console.log(error);
-      } else {
-        console.log(accounts);
-        console.log(Contract)
+      // get ABI
+      let abi = contractJson.abi;
+      let bytecode = contractJson.bytecode;
+      let Contract  = this.state.web3.eth.contract(abi);
 
-        let contract = Contract.new({from: accounts[0], gas: 1000000, data: bytecode}, (err, result) => {
-          if (err) {
-            alert("Problem deployig contract");
-            console.log(err);
-          } else {
-            alert("Contract deployed");
-            console.log(result);
-            this.setState({
-              txnHash: result.transactionHash,
-              contractAddress: result.address
-            });
-          }
-        });
-      }
+      this.state.web3.eth.getAccounts((error, accounts) => {
+        if (error) {
+          console.log(error);
+          alert("Problem getting account info");
+        } else {
+          console.log(accounts);
+          console.log(Contract)
+
+          Contract.new({from: accounts[0], data: bytecode}, (err, result) => {
+            if (err) {
+              console.log(err.message);
+              alert("Problem deployig contract");
+            } else {
+              console.log(result);
+              this.setState({
+                txnHash: result.transactionHash,
+                contractAddress: result.address,
+                deployedContract: result
+              });
+              alert("Contract deployed");
+            }
+          });
+
+        }
+      });
+
     });
 
   }
@@ -71,17 +82,23 @@ class App extends Component {
       <div className="pure-u-1-1">
         <br />
         <br />
-        <h2>Contract Deployed</h2>
+        {this.state.contractAddress && this.state.txnHash ? (<h2>Contract Deployed</h2>) : null}
+        {!this.state.contractAddress && this.state.txnHash ? (<h2>Deploying Contract</h2>) : null}
         <br />
+        {this.state.txnHash ? (
+          <div className="pure-u-1-1">
+            <label>Transaction Hash: </label>
+            <p>{this.state.txnHash}</p>
+          </div>
+        ) : null}
+        <br />
+        {this.state.contractAddress ? (
           <div className="pure-u-1-1">
             <label>Contract Address: </label>
             <p>{this.state.contractAddress}</p>
-         </div>
-         <br />
-         <div className="pure-u-1-1">
-           <label>Transaction Hash: </label>
-           <p>{this.state.contractAddress}</p>
-         </div>
+          </div>
+        ) : null}
+        <br />
       </div>
     );
   }
@@ -107,7 +124,7 @@ class App extends Component {
              </form>
             </div>
             <br />
-            {this.state.contractAddress && this.state.txnHash ? this.getDeploymentSuccessView() : null}
+            {this.state.contractAddress || this.state.txnHash ? this.getDeploymentSuccessView() : null}
           </div>
         </main>
       </div>
