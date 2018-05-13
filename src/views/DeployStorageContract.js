@@ -14,7 +14,8 @@ class App extends Component {
       web3: null,
       txnHash: null,
       contractAddress: null,
-      deployedContract: null
+      deployedContract: null,
+      network: null
     }
   }
 
@@ -25,10 +26,12 @@ class App extends Component {
     getWeb3
     .then(results => {
       this.setState({
-        web3: results.web3
+        web3: results.web3,
+        network: results.web3.currentProvider.publicConfigStore._state.networkVersion
       })
     })
-    .catch(() => {
+    .catch((e) => {
+      console.log(e)
       console.log('Error finding web3.')
     })
   }
@@ -66,7 +69,6 @@ class App extends Component {
                 contractAddress: result.address,
                 deployedContract: result
               });
-              alert("Contract deployed");
             }
           });
 
@@ -83,7 +85,7 @@ class App extends Component {
         <br />
         <br />
         {this.state.contractAddress && this.state.txnHash ? (<h2>Contract Deployed</h2>) : null}
-        {!this.state.contractAddress && this.state.txnHash ? (<h2>Deploying Contract</h2>) : null}
+        {!this.state.contractAddress && this.state.txnHash ? (<h2>Deploying Contract ......</h2>) : null}
         <br />
         {this.state.txnHash ? (
           <div className="pure-u-1-1">
@@ -113,7 +115,8 @@ class App extends Component {
             </div>
             <br />
             <div className="pure-u-1-1">
-              <p>Click the button below to deploy contract</p>
+              <p>Click the button below to deploy contract. Refresh page if you changed network or no current network displayed</p>
+              <p><b>Current Network:</b> {this.state.network}</p>
               <form className="form-inline">
                 <button className="btn btn-primary my-2 my-sm-0" type="button" onClick={() => {
                     this.deployContract();
@@ -125,6 +128,22 @@ class App extends Component {
             </div>
             <br />
             {this.state.contractAddress || this.state.txnHash ? this.getDeploymentSuccessView() : null}
+          </div>
+          <br />
+          <br />
+          <br />
+          <div className="pure-g">
+            <div className="pure-u-1-1">
+              <h2>Networks ID Index</h2>
+            </div>
+            <br />
+            <div className="pure-u-1-1">
+              <p>Main Ethereum Network --> 1</p>
+              <p>Ropsten Ethereum Network --> 3</p>
+              <p>Kovan Ethereum Network --> 42</p>
+              <p>Rinkeby Ethereum Network --> 4</p>
+              <p>Private Network --> 5777</p>
+            </div>
           </div>
         </main>
       </div>
