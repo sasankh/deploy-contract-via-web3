@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import * as queryString from 'query-string'
 
 import SimpleStorageContract from '../../build/contracts/SimpleStorage.json'
+import SimpleStorageInitContract from '../../build/contracts/SimpleStorageInit.json'
 import getWeb3 from '../utils/getWeb3'
 
 import '../css/oswald.css'
@@ -40,7 +41,7 @@ class App extends Component {
     })
   }
 
-  deployContract() {
+  deploySimpleContract() {
 
     this.setState({
       txnHash: null,
@@ -135,10 +136,10 @@ class App extends Component {
               <p><b>Current Network:</b> {this.state.network}</p>
               <form className="form-inline">
                 <button className="btn btn-primary my-2 my-sm-0" type="button" onClick={() => {
-                    this.deployContract();
+                    this.deploySimpleContract();
                   }}
                 >
-                Deploy
+                Deploy Simple Contract
                </button>
              </form>
             </div>
