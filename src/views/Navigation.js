@@ -12,6 +12,9 @@ const Navigation = () => (
           <li className="nav-item active">
             <Link className="nav-link" to='/simpleStorage'>Simple Storage</Link>
           </li>
+          <li className="nav-item active">
+            <Link className="nav-link" to='/deployStorageContract'>Deploy Contract</Link>
+          </li>
         </ul>
       </div>
     </nav>
