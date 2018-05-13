@@ -15,6 +15,7 @@ class App extends Component {
       txnHash: null,
       contractAddress: null,
       deployedContract: null,
+      contractNetwork: null,
       network: null
     }
   }
@@ -41,7 +42,8 @@ class App extends Component {
     this.setState({
       txnHash: null,
       contractAddress: null,
-      deployedContract: null
+      deployedContract: null,
+      contractNetwork: null
     }, () => {
       let contractJson = SimpleStorageContract;
 
@@ -55,7 +57,6 @@ class App extends Component {
           console.log(error);
           alert("Problem getting account info");
         } else {
-          console.log(accounts);
           console.log(Contract)
 
           Contract.new({from: accounts[0], data: bytecode}, (err, result) => {
@@ -67,7 +68,8 @@ class App extends Component {
               this.setState({
                 txnHash: result.transactionHash,
                 contractAddress: result.address,
-                deployedContract: result
+                deployedContract: result,
+                contractNetwork: this.state.network
               });
             }
           });
@@ -89,15 +91,22 @@ class App extends Component {
         <br />
         {this.state.txnHash ? (
           <div className="pure-u-1-1">
-            <label>Transaction Hash: </label>
+            <b>Transaction Hash: </b>
             <p>{this.state.txnHash}</p>
           </div>
         ) : null}
         <br />
         {this.state.contractAddress ? (
           <div className="pure-u-1-1">
-            <label>Contract Address: </label>
+            <b>Contract Address: </b>
             <p>{this.state.contractAddress}</p>
+          </div>
+        ) : null}
+        <br />
+        {this.state.contractNetwork && this.state.contractAddress ? (
+          <div className="pure-u-1-1">
+            <b>Contract Network: </b>
+            <p>{this.state.contractNetwork}</p>
           </div>
         ) : null}
         <br />
