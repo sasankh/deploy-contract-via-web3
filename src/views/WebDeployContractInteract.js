@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import * as queryString from 'query-string'
-import SimpleStorageContract from '../../build/contracts/SimpleStorage.json'
+import SimpleStorageContractBase from '../../build/contracts/SimpleStorage.json'
 import getWeb3 from '../utils/getWeb3'
 
 import '../css/oswald.css'
@@ -18,6 +18,7 @@ class App extends Component {
       txnHash: null,
       contractAddress: null,
       contractNetwork: null,
+      deployedContractAbi: null,
       storageValue: 0,
       inputValue: 0
     }
@@ -28,7 +29,6 @@ class App extends Component {
     // See utils/getWeb3 for more info.
 
     let queries = queryString.parse(location.search);
-    console.log(queries)
 
     getWeb3
     .then(results => {
@@ -39,11 +39,38 @@ class App extends Component {
         txnHash: queries.txnHash,
         contractNetwork: queries.contractNetwork,
       }, () => {
+        let networks = {};
+        networks[this.state.contractNetwork] = {
+          "events": {},
+          "links": {},
+          "address": this.state.contractAddress,
+          "transactionHash": this.state.txnHash
+        }
 
+        let deployedContractAbi =  Object.assign(SimpleStorageContractBase, {networks});
+
+        this.setState({
+          deployedContractAbi
+        }, () => {
+          this.getCurrentValue();
+        });
       });
     })
     .catch(() => {
       console.log('Error finding web3.')
+    })
+  }
+
+  componentWillUnmount() {
+    this.setState({
+      web3: null,
+      network: null,
+      txnHash: null,
+      contractAddress: null,
+      contractNetwork: null,
+      deployedContractAbi: null,
+      storageValue: 0,
+      inputValue: 0
     })
   }
 
@@ -56,7 +83,7 @@ class App extends Component {
      */
 
     const contract = require('truffle-contract')
-    const simpleStorage = contract(SimpleStorageContract)
+    const simpleStorage = contract(this.state.deployedContractAbi)
     simpleStorage.setProvider(this.state.web3.currentProvider)
 
     // Declaring this for later so we can chain functions on SimpleStorage.
@@ -90,7 +117,7 @@ class App extends Component {
      */
 
     const contract = require('truffle-contract')
-    const simpleStorage = contract(SimpleStorageContract)
+    const simpleStorage = contract(this.state.deployedContractAbi)
     simpleStorage.setProvider(this.state.web3.currentProvider)
 
     // Declaring this for later so we can chain functions on SimpleStorage.
