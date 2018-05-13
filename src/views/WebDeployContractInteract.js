@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import * as queryString from 'query-string'
 import SimpleStorageContract from '../../build/contracts/SimpleStorage.json'
 import getWeb3 from '../utils/getWeb3'
 
@@ -12,8 +13,12 @@ class App extends Component {
     super(props)
 
     this.state = {
-      storageValue: 0,
       web3: null,
+      network: null,
+      txnHash: null,
+      contractAddress: null,
+      contractNetwork: null,
+      storageValue: 0,
       inputValue: 0
     }
   }
@@ -22,14 +27,20 @@ class App extends Component {
     // Get network provider and web3 instance.
     // See utils/getWeb3 for more info.
 
+    let queries = queryString.parse(location.search);
+    console.log(queries)
+
     getWeb3
     .then(results => {
       this.setState({
-        web3: results.web3
-      })
+        web3: results.web3,
+        network: results.web3.currentProvider.publicConfigStore._state.networkVersion,
+        contractAddress: queries.contractAddress,
+        txnHash: queries.txnHash,
+        contractNetwork: queries.contractNetwork,
+      }, () => {
 
-      // Instantiate contract once web3 provided.
-      this.getCurrentValue();
+      });
     })
     .catch(() => {
       console.log('Error finding web3.')
@@ -127,6 +138,21 @@ class App extends Component {
                 Set Value
                </button>
              </form>
+            </div>
+          </div>
+          <br />
+          <br />
+          <br />
+          <div className="pure-g">
+            <div className="pure-u-1-1">
+              <h2>Contract And Network Information</h2>
+            </div>
+            <br />
+            <div className="pure-u-1-1">
+              <p>Contract Address --> {this.state.contractAddress}</p>
+              <p>Contract TxnHash --> {this.state.txnHash}</p>
+              <p>Contract Network --> {this.state.contractNetwork}</p>
+              <p><b>Current Network --> </b> {this.state.network}</p>
             </div>
           </div>
         </main>
