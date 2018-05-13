@@ -1,4 +1,7 @@
 import React, { Component } from 'react'
+import { Link } from 'react-router-dom'
+import * as queryString from 'query-string'
+
 import SimpleStorageContract from '../../build/contracts/SimpleStorage.json'
 import getWeb3 from '../utils/getWeb3'
 
@@ -99,7 +102,11 @@ class App extends Component {
         {this.state.contractAddress ? (
           <div className="pure-u-1-1">
             <b>Contract Address: </b>
-            <p>{this.state.contractAddress}</p>
+            <p><Link to={`/contract?${queryString.stringify({
+                contractAddress: this.state.contractAddress,
+                txnHash: this.state.txnHash,
+                contractNetwork: this.state.contractNetwork
+              })}`}>{this.state.contractAddress}</Link></p>
           </div>
         ) : null}
         <br />
