@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import * as queryString from 'query-string'
 
 import SimpleStorageContract from '../../build/contracts/SimpleStorage.json'
+import SimpleStorageInitContract from '../../build/contracts/SimpleStorageInit.json'
 import getWeb3 from '../utils/getWeb3'
 
 import '../css/oswald.css'
@@ -19,7 +20,8 @@ class App extends Component {
       contractAddress: null,
       deployedContract: null,
       contractNetwork: null,
-      network: null
+      network: null,
+      constructorValue: null
     }
   }
 
@@ -40,13 +42,14 @@ class App extends Component {
     })
   }
 
-  deployContract() {
+  deploySimpleContract() {
 
     this.setState({
       txnHash: null,
       contractAddress: null,
       deployedContract: null,
-      contractNetwork: null
+      contractNetwork: null,
+      constructorValue: null
     }, () => {
       let contractJson = SimpleStorageContract;
 
@@ -63,6 +66,51 @@ class App extends Component {
           console.log(Contract)
 
           Contract.new({from: accounts[0], data: bytecode}, (err, result) => {
+            if (err) {
+              console.log(err.message);
+              alert("Problem deployig contract");
+            } else {
+              console.log(result);
+              this.setState({
+                txnHash: result.transactionHash,
+                contractAddress: result.address,
+                deployedContract: result,
+                contractNetwork: this.state.network
+              });
+            }
+          });
+
+        }
+      });
+
+    });
+
+  }
+
+
+  deployContractWithConstructor() {
+
+    this.setState({
+      txnHash: null,
+      contractAddress: null,
+      deployedContract: null,
+      contractNetwork: null
+    }, () => {
+      let contractJson = SimpleStorageInitContract;
+
+      // get ABI
+      let abi = contractJson.abi;
+      let bytecode = contractJson.bytecode;
+      let Contract  = this.state.web3.eth.contract(abi);
+
+      this.state.web3.eth.getAccounts((error, accounts) => {
+        if (error) {
+          console.log(error);
+          alert("Problem getting account info");
+        } else {
+          console.log(Contract)
+
+          Contract.new(this.state.constructorValue, {from: accounts[0], data: bytecode}, (err, result) => {
             if (err) {
               console.log(err.message);
               alert("Problem deployig contract");
@@ -131,17 +179,45 @@ class App extends Component {
             </div>
             <br />
             <div className="pure-u-1-1">
-              <p>Click the button below to deploy contract. Refresh page if you changed network or no current network displayed</p>
+              <p>Click the buttons below to deploy contract. Refresh page if you changed network or no current network displayed</p>
               <p><b>Current Network:</b> {this.state.network}</p>
+              <br />
+              <p><b>Contract without inital value</b></p>
               <form className="form-inline">
+
+                <br />
                 <button className="btn btn-primary my-2 my-sm-0" type="button" onClick={() => {
-                    this.deployContract();
+                    this.deploySimpleContract();
                   }}
                 >
-                Deploy
+                Deploy Simple Contract
                </button>
              </form>
+             <br />
+             <br />
             </div>
+            <div className="pure-u-1-1">
+              <p><b>Contract with inital value</b></p>
+              <form className="form-inline">
+                <input className="form-control mr-sm-2" type="number" onChange={(e) => {
+                    this.setState({
+                      constructorValue: e.target.value
+                    });
+                  }}
+                />
+                <br />
+                <button className="btn btn-outline-success my-2 my-sm-0" type="button" onClick={() => {
+                    if (this.state.constructorValue && this.state.constructorValue >= 0) {
+                      this.deployContractWithConstructor();
+                    } else {
+                      alert("Enter a positive number")
+                    }
+                  }}
+                >
+                Deploy Contract with Constructor
+                </button>
+               </form>
+              </div>
             <br />
             {this.state.contractAddress || this.state.txnHash ? this.getDeploymentSuccessView() : null}
           </div>
